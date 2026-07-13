@@ -109,11 +109,80 @@ curl https://<云托管服务域名>/api/count
 curl -X POST -H 'content-type: application/json' -d '{"action": "inc"}' https://<云托管服务域名>/api/count
 ```
 
+### `POST /api/parking-feedback`
+
+保存用户对停车场的推荐、风险提示或信息纠错。小程序通过 `wx.cloud.callContainer` 调用时，云托管会自动在请求头中注入 `x-wx-openid`。
+
+#### 请求参数
+
+- `key`：停车场唯一键，必填
+- `action`：反馈类型，枚举值 `recommend` / `risk` / `issue`
+- `reasonIds`：反馈原因 ID 数组
+- `reasonLabel`：反馈原因中文文本
+- `name`：停车场名称
+- `address`：停车场地址
+- `parkingId`：第三方 POI ID
+- `latitude` / `longitude`：停车场坐标
+- `parkingType`：停车场类型
+
+#### 响应示例
+
+```json
+{
+  "code": 0,
+  "data": {
+    "id": 1,
+    "feedbackKey": "id:123",
+    "action": "recommend",
+    "saved": true
+  }
+}
+```
+
+### `GET /api/parking-feedback/summary`
+
+获取停车场用户推荐统计。
+
+#### 请求参数
+
+- `keys`：可选，多个停车场 key 用英文逗号分隔
+
+#### 调用示例
+
+```
+curl "https://<云托管服务域名>/api/parking-feedback/summary?keys=id:123,id:456"
+```
+
+### `POST /api/subscribe`
+
+保存用户订阅偏好。该接口需要云托管注入 `x-wx-openid`，用于后续订阅消息推送。
+
+#### 请求参数
+
+- `selectedTypes`：订阅类型数组
+- `city` / `locationName`：用户所在城市或位置描述
+- `latitude` / `longitude`：用户位置坐标
+
+### `POST /api/push/typhoon-alert`
+
+记录台风提醒推送请求。该接口是后续后台任务/管理员触发推送使用，不建议开放给普通小程序用户。
+
+生产环境必须配置环境变量：
+
+- `PUSH_API_SECRET`：推送接口调用密钥
+
+调用时需要请求头：
+
+```
+X-API-KEY: <PUSH_API_SECRET>
+```
+
 ## 使用注意
 如果不是通过微信云托管控制台部署模板代码，而是自行复制/下载模板代码后，手动新建一个服务并部署，需要在「服务设置」中补全以下环境变量，才可正常使用，否则会引发无法连接数据库，进而导致部署失败。
 - MYSQL_ADDRESS
 - MYSQL_PASSWORD
 - MYSQL_USERNAME
+- MYSQL_DATABASE（可选，默认 `nodejs_demo`）
 以上三个变量的值请按实际情况填写。如果使用云托管内MySQL，可以在控制台MySQL页面获取相关信息。
 
 
