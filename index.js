@@ -286,7 +286,13 @@ app.use(require("./qweather-proxy"));
 const port = process.env.PORT || 80;
 
 async function bootstrap() {
-  await initDB();
+  // 数据库初始化失败不阻塞启动,缓存代理等无 DB 依赖接口仍可用
+  try {
+    await initDB();
+    console.log("[bootstrap] 数据库初始化成功");
+  } catch (err) {
+    console.error("[bootstrap] 数据库初始化失败,带 DB 的接口将不可用:", err && err.message);
+  }
   app.listen(port, () => {
     console.log("启动成功", port);
   });
