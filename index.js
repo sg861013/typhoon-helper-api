@@ -280,6 +280,9 @@ app.get("/api/wx_openid", async (req, res) => {
   }
 });
 
+// 和风天气缓存代理:服务端共享内存缓存,所有用户共用一份
+app.use(require("./qweather-proxy"));
+
 const port = process.env.PORT || 80;
 
 async function bootstrap() {
